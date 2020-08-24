@@ -1,0 +1,23 @@
+{
+    "name": "aiidalab-dev",
+    "version": "0.1.0",
+    "author": "The AiiDAlab team",
+    "author_email": "aiidalab@materialscloud.org",
+    "description": "Tools for AiiDAlab development.",
+    "url": "https://github.com/aiidalab/aiidalab-dev",
+    "license": "MIT License",
+    "classifiers": [
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Framework :: AiiDA",
+	"Development Status :: 1 - Planning"
+    ],
+    "extras_require": {
+        "pre-commit": [
+		"pre-commit==1.17.0",
+		"yapf==0.29.0",
+		"prospector==1.3.0",
+		"pylint==2.5.2"
+        ]
+    }
+}
