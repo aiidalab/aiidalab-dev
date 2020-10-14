@@ -5,6 +5,7 @@ from pathlib import Path
 from subprocess import run
 
 import click
+import toml
 import aiidalab.config
 
 
@@ -33,6 +34,8 @@ def cli(ctx, local_prefix):
         home_app_system = Path('/opt/aiidalab-home')
         home_app_user = apps_path.joinpath('home')
 
+        config_file = Path.home() / 'aiidalab.toml'
+
     ctx.obj['paths'] = Paths
 
 
@@ -57,6 +60,13 @@ def restore(ctx):
     else:
         click.echo(f"Link {paths.home_app_user} -> {paths.home_app_system}")
         paths.home_app_user.symlink_to(paths.home_app_system)
+
+    try:
+        config = toml.loads(paths.config_file.read_text())
+        config['develop'] = False
+        paths.config_file.write_text(toml.dumps(config))
+    except FileNotFoundError:
+        pass  # config file does not exist, nothing to do
 
     click.secho("Mode: SYSTEM", fg='green')
 
@@ -94,6 +104,16 @@ def status(ctx):
         else:
             msg_issue(f"Directory {paths.aiidalab_home_dev} does not exist.")
 
+        try:
+            config = toml.loads(paths.config_file.read_text())
+        except FileNotFoundError:
+            msg_issue(f"File '{paths.config_file!s}' does not exist.")
+        else:
+            if config.get('develop'):
+                msg_ok(f"Key 'develop' set to True in '{paths.config_file!s}'.")
+            else:
+                msg_issue(f"Key 'develop' not set to True in '{paths.config_file!s}'.")
+
         if paths.aiidalab_home_dev_aiidalab_link.resolve() == paths.aiidalab_dev_package.resolve():
             msg_ok(f"Link {paths.aiidalab_home_dev_aiidalab_link} to {paths.aiidalab_dev_package} is set.")
         else:
@@ -105,6 +125,16 @@ def status(ctx):
             msg_issue(f"Link {paths.home_app_user} to {paths.aiidalab_home_dev} is missing.")
     elif system_mode:
         msg_ok(f"Link {paths.home_app_user} to {paths.home_app_system} is set.")
+
+        try:
+            config = toml.loads(paths.config_file.read_text())
+        except FileNotFoundError:
+            msg_ok(f"Local config file '{paths.config_file!s}' does not exist.")
+        else:
+            if config.get('develop'):
+                msg_issue(f"Key 'develop' set to True in '{paths.config_file!s}'.")
+            else:
+                msg_ok(f"Key 'develop' not set to True in '{paths.config_file!s}'.")
 
     elif paths.home_app_user.exists():
         msg_issue("The home app is installed, but is either a local directory or points to an unknown location.")
@@ -162,6 +192,14 @@ def setup(ctx, github_username, use_ssh):
     else:
         click.echo(f"Link {paths.home_app_user} -> {paths.aiidalab_home_dev}")
         paths.home_app_user.symlink_to(paths.aiidalab_home_dev, target_is_directory=True)
+
+    # Set 'develop' key in local aiidalab config.
+    try:
+        config = toml.loads(paths.config_file.read_text())
+    except FileNotFoundError:
+        config = dict()
+    config['develop'] = True
+    paths.config_file.write_text(toml.dumps(config))
 
     click.secho("Mode: DEVELOPMENT", fg='green')
 
