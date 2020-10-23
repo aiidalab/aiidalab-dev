@@ -1,12 +1,50 @@
 #!/usr/bin/env python
-"""Utility CLI to control the AiiDAlab development environment."""
+# -*- coding: utf-8 -*-
+"""Utility CLI to aid in AiiDAlab development."""
 # pylint: disable=invalid-name,too-many-branches
+import logging
 from pathlib import Path
 from subprocess import run
 
 import click
+import dulwich
 import toml
+from tabulate import tabulate
+
 import aiidalab.config
+from aiidalab.app import AiidaLabApp
+from aiidalab.utils import load_app_registry
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+_FMT_BOOL_AND_NONE = {None: "n/a", False: "no", True: "yes"}
+
+
+
+def _get_app_from_name(name):
+    """Return the app instance from name."""
+    apps = load_app_registry()['apps']
+    app_data = apps.get(name)
+    if app_data is None:
+        click.secho(f"Did not find app '{name}' in app registry.", fg='yellow')
+    return AiidaLabApp(name, app_data, aiidalab.config.AIIDALAB_APPS, watch=False)
+
+
+def _get_app():
+    """Return the app instance from the current working directory."""
+    try:
+        name = str(Path.cwd().relative_to(aiidalab.config.AIIDALAB_APPS))
+        if name == '.':
+            raise ValueError
+    except ValueError:
+        raise click.ClickException(f"The current directory is not a sub-directory of '{aiidalab.config.AIIDALAB_APPS}'.")
+
+    try:
+        return _get_app_from_name(name)
+    except dulwich.errors.NotGitRepository:
+        raise click.ClickException("The app directory must be a git repository.")
 
 
 @click.group()
@@ -202,6 +240,20 @@ def setup(ctx, github_username, use_ssh):
     paths.config_file.write_text(toml.dumps(config))
 
     click.secho("Mode: DEVELOPMENT", fg='green')
+
+
+@cli.command()
+def app():
+    """Show basic information about an app and the installation status."""
+    app = _get_app()
+    rows = list()
+    rows.append(("AiiDAlab app", app.name))
+    rows.append(("Version:", app.installed_version))
+    rows.append(("Detached:", _FMT_BOOL_AND_NONE[app.detached]))
+    rows.append(("Compatible:", _FMT_BOOL_AND_NONE[app.compatible]))
+
+    click.echo(tabulate(rows))
+
 
 
 if __name__ == '__main__':
