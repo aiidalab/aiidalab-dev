@@ -78,6 +78,14 @@ def cli(ctx, local_prefix):
 
 
 @cli.command()
+def config():
+    """Show the current configuration."""
+    cfg = {key[len('AIIDALAB_'):].lower() : getattr(aiidalab.config, key)
+           for key in dir(aiidalab.config) if key.startswith('AIIDALAB_')}
+    click.echo(toml.dumps(cfg))
+
+
+@cli.command()
 @click.pass_context
 def restore(ctx):
     """Restore the system configuration of the home app."""
