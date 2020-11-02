@@ -3,6 +3,7 @@
 """Utility CLI to aid in AiiDAlab development."""
 # pylint: disable=invalid-name,too-many-branches
 import logging
+import json
 from pathlib import Path
 from subprocess import run
 
@@ -83,6 +84,13 @@ def config():
     cfg = {key[len('AIIDALAB_'):].lower() : getattr(aiidalab.config, key)
            for key in dir(aiidalab.config) if key.startswith('AIIDALAB_')}
     click.echo(toml.dumps(cfg))
+
+
+@cli.command()
+def registry():
+    """Show the registry."""
+    registry = load_app_registry()
+    click.echo(json.dumps(registry, indent=2))
 
 
 @cli.command()
