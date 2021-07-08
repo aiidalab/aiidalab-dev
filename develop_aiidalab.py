@@ -14,7 +14,8 @@ from tabulate import tabulate
 
 import aiidalab.config
 from aiidalab.app import AiidaLabApp
-from aiidalab.utils import load_app_registry
+from aiidalab.utils import load_app_registry_entry
+from aiidalab.utils import load_app_registry_index
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -87,10 +88,13 @@ def config():
 
 
 @cli.command()
-def registry():
+@click.option('-a', '--app')
+def registry(app):
     """Show the registry."""
-    registry = load_app_registry()
-    click.echo(json.dumps(registry, indent=2))
+    if app:
+        click.echo(json.dumps(load_app_registry_entry(app), indent=2))
+    else:
+        click.echo(json.dumps(load_app_registry_index(), indent=2))
 
 
 @cli.command()
