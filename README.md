@@ -1,13 +1,11 @@
 # aiidalab-dev
 Development utilities for AiiDAlab
 
-To install, clone the repository and execute
+To install, execute
 ```console
-git clone https://github.com/aiidalab/aiidalab-dev.git
-cd aiidalab-dev
-pip install -e .
+pip install git+https://github.com/aiidalab/aiidalab-dev 
 ```
-To use, simply exeucte
+To use, execute
 ```console
 $ develop-aiidalab --help
 Usage: develop-aiidalab [OPTIONS] COMMAND [ARGS]...
