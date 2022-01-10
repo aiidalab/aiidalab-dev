@@ -3,7 +3,7 @@ Development utilities for AiiDAlab
 
 To install, execute
 ```console
-pip install git+https://github.com/aiidalab/aiidalab-dev 
+pip install git+https://github.com/aiidalab/aiidalab-dev
 ```
 To use, execute
 ```console
