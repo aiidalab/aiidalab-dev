@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Utility CLI to aid in AiiDAlab development."""
 import json
-
-# pylint: disable=invalid-name,too-many-branches
 import logging
 from pathlib import Path
 from subprocess import run
